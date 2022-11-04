@@ -1,3 +1,3 @@
---DML
---SELECT
-select * from registrations;
+----DML
+----SELECT
+--select * from registrations;

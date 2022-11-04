@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class Dss3MsLoginV1ApplicationTests {
+class Dss8ApiGatewayApplicationTests {
 
 	@Test
 	void contextLoads() {
