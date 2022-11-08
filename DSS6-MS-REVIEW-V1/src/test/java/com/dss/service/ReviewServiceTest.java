@@ -10,17 +10,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
-public class ReviewServiceTest {
+ class ReviewServiceTest {
 
     @Mock
     private ReviewRepository reviewRepository;
@@ -29,6 +26,7 @@ public class ReviewServiceTest {
     private ReviewService reviewService = new ReviewServiceImpl();
 
     private static final UUID ID = UUID.randomUUID();
+    private static final UUID MOVIE_ID = UUID.randomUUID();
     private static final Review REVIEW = new Review();
     private static final ReviewRequestDTO REQ = new ReviewRequestDTO();
     private static final List<Review> RES = new ArrayList<>();
@@ -40,6 +38,14 @@ public class ReviewServiceTest {
         when(reviewRepository.findAll()).thenReturn(RES);
         List<Review> res = reviewService.getReviews();
         assertEquals(RES, res);
+    }
+    @Test
+    @DisplayName("Find Reviews by Movie Id When Reviews Exists")
+    void findReviewsByMovieIdWhenReviewExists() {
+        Optional<List<Review>> optionalReviews = Optional.of(Collections.singletonList(REVIEW));
+        when(reviewRepository.findReviewsByMovieId(MOVIE_ID)).thenReturn(optionalReviews);
+        List<Review> res = reviewService.getReviewsByMovie(MOVIE_ID);
+        assertEquals(optionalReviews.get(), res);
     }
 
     @Test
@@ -62,7 +68,7 @@ public class ReviewServiceTest {
         ReviewNotFoundException exception = assertThrows(ReviewNotFoundException.class,
                 () -> reviewService.getReviewById(ID));
 
-        assertEquals("Review not found!", exception.getMessage());
+        assertEquals("Review not found with Id: ".concat(ID.toString()), exception.getMessage());
     }
 
     @Test
