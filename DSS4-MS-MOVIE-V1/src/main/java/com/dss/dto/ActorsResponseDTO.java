@@ -9,6 +9,6 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ActorsDTO {
+public class ActorsResponseDTO {
     private List<ActorDTO> actors;
 }
