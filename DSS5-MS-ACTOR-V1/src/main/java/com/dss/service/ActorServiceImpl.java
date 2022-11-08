@@ -1,7 +1,7 @@
 package com.dss.service;
 
 import com.dss.dto.ActorRequestDTO;
-import com.dss.dto.Actors;
+import com.dss.dto.ActorsDTO;
 import com.dss.dto.MovieDTO;
 import com.dss.entity.Actor;
 import com.dss.exception.ActorException;
@@ -31,7 +31,7 @@ public class ActorServiceImpl  implements ActorService{
 
     @Override
     public List<Actor> getActors() {
-        List actors;
+        List<Actor> actors;
         actors = actorRepository.findAll();
         return actors;
     }
@@ -44,11 +44,11 @@ public class ActorServiceImpl  implements ActorService{
     }
 
     @Override
-    public Actors getActorByMovieId(UUID id) {
+    public ActorsDTO getActorByMovieId(UUID id) {
         log.info("Inside getActorByMovieId with Id: " + id);
-        Actors actors = new Actors();
-        actors.setActors(actorRepository.findActorsByMovieId(id).orElseThrow(() -> new ActorNotFoundException(id)));
-        return actors;
+        ActorsDTO actorsDTO = new ActorsDTO();
+        actorsDTO.setActors(actorRepository.findActorsByMovieId(id).orElseThrow(() -> new ActorNotFoundException(id)));
+        return actorsDTO;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class ActorServiceImpl  implements ActorService{
 
 
     @Override
-    public Actors create(List<ActorRequestDTO> request) {
+    public ActorsDTO create(List<ActorRequestDTO> request) {
         log.info("Inside create");
         List<Actor> actorList = new ArrayList<>();
         for (ActorRequestDTO requests: request) {
@@ -68,9 +68,9 @@ public class ActorServiceImpl  implements ActorService{
         dtoToEntity(requests,actor);
         actorList.add(actorRepository.save(actor));
         }
-        Actors savedActors = new Actors();
-        savedActors.setActors(actorList);
-        return savedActors;
+        ActorsDTO savedActorsDTO = new ActorsDTO();
+        savedActorsDTO.setActors(actorList);
+        return savedActorsDTO;
     }
 
     @Override

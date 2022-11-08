@@ -1,7 +1,7 @@
 package com.dss.controller;
 
 import com.dss.dto.ActorRequestDTO;
-import com.dss.dto.Actors;
+import com.dss.dto.ActorsDTO;
 import com.dss.dto.MovieDTO;
 import com.dss.entity.Actor;
 import com.dss.service.ActorService;
@@ -32,7 +32,7 @@ public class ActorController {
     }
 
     @GetMapping("/movie/{id}")
-    public ResponseEntity<Actors> getActorByMovie(@PathVariable UUID id) {
+    public ResponseEntity<ActorsDTO> getActorByMovie(@PathVariable UUID id) {
         return new ResponseEntity<>(actorService.getActorByMovieId(id), HttpStatus.OK);
     }
     @GetMapping("/{id}/movie")
@@ -41,7 +41,7 @@ public class ActorController {
     }
 
     @PostMapping()
-    public ResponseEntity<Actors> create(@RequestBody List<ActorRequestDTO> request) {
+    public ResponseEntity<ActorsDTO> create(@RequestBody List<ActorRequestDTO> request) {
         return new ResponseEntity<>(actorService.create(request), HttpStatus.CREATED);
     }
 

@@ -1,7 +1,7 @@
 package com.dss.service;
 
 import com.dss.dto.ActorRequestDTO;
-import com.dss.dto.Actors;
+import com.dss.dto.ActorsDTO;
 import com.dss.dto.MovieDTO;
 import com.dss.entity.Actor;
 
@@ -12,9 +12,9 @@ public interface ActorService {
 
     List<Actor> getActors();
     Actor getActorById(UUID id);
-    Actors getActorByMovieId(UUID id);
+    ActorsDTO getActorByMovieId(UUID id);
     MovieDTO getMovieByActorId(UUID id);
-    Actors create(List<ActorRequestDTO> request);
+    ActorsDTO create(List<ActorRequestDTO> request);
     Actor update(UUID id, ActorRequestDTO request);
     String delete(UUID id);
 }

@@ -1,7 +1,7 @@
 package com.dss.controller;
 
 import com.dss.dto.ActorRequestDTO;
-import com.dss.dto.Actors;
+import com.dss.dto.ActorsDTO;
 import com.dss.dto.MovieDTO;
 import com.dss.entity.Actor;
 import com.dss.service.ActorService;
@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = ActorController.class)
-public class ActorControllerTest {
+class ActorControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -72,14 +72,14 @@ public class ActorControllerTest {
     @Test
     @DisplayName("GET: Actor By Movie Id")
     void getActorByMovie() throws Exception {
-        Actors actors = mockActors();
-        when(actorService.getActorByMovieId(MOVIE_ID)).thenReturn(actors);
+        ActorsDTO actorsDTO = mockActors();
+        when(actorService.getActorByMovieId(MOVIE_ID)).thenReturn(actorsDTO);
 
         MvcResult result = this.mockMvc.perform(get("/actors/movie/{id}", MOVIE_ID))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        assertEquals(actors, asObject(result.getResponse().getContentAsString(), Actors.class));
+        assertEquals(actorsDTO, asObject(result.getResponse().getContentAsString(), ActorsDTO.class));
     }
 
     @Test
@@ -106,7 +106,7 @@ public class ActorControllerTest {
                 .andExpect(status().isCreated())
                 .andReturn();
 
-        assertEquals(mockActors(), asObject(result.getResponse().getContentAsString(), Actors.class));
+        assertEquals(mockActors(), asObject(result.getResponse().getContentAsString(), ActorsDTO.class));
     }
 
     @Test
@@ -180,10 +180,10 @@ public class ActorControllerTest {
         return actor;
     }
 
-    private Actors mockActors(){
-        Actors actors = new Actors();
-        actors.setActors(Collections.singletonList(mockActor()));
-        return actors;
+    private ActorsDTO mockActors(){
+        ActorsDTO actorsDTO = new ActorsDTO();
+        actorsDTO.setActors(Collections.singletonList(mockActor()));
+        return actorsDTO;
     }
 
     private MovieDTO mockMovie(){
