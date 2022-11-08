@@ -44,10 +44,10 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public MovieDTO getMovieById(UUID id) {
         log.info("Inside getMovieByMovieId with Id: " + id);
-        Actors actors = getActorsByMovieId(id);
+        ActorsDTO actorsDTO = getActorsByMovieId(id);
         Movie savedMovie = movieRepository.findById(id)
                 .orElseThrow(() -> new MovieNotFoundException(id));
-        return entityToMovieDTO(savedMovie,actors,new MovieDTO());
+        return entityToMovieDTO(savedMovie, actorsDTO,new MovieDTO());
     }
 
     @Override
@@ -66,7 +66,7 @@ public class MovieServiceImpl implements MovieService {
             actorRequest.setMovieId(movie.getMovieId());
             actorRequestList.add(actorRequest);
         }
-        Actors restActor = addActor(actorRequestList);
+        ActorsDTO restActor = addActor(actorRequestList);
         String message = "Movie added.";
         return entityToDTO(movie,restActor.getActors(),new MovieResponseDTO(), message);
     }
@@ -111,7 +111,7 @@ public class MovieServiceImpl implements MovieService {
         return entity;
     }
 
-    private MovieDTO entityToMovieDTO(Movie entity,Actors actor,MovieDTO dto) {
+    private MovieDTO entityToMovieDTO(Movie entity, ActorsDTO actor, MovieDTO dto) {
         dto.setMovieId(entity.getMovieId());
         dto.setImage(entity.getImage());
         dto.setMovieTitle(entity.getMovieTitle());
@@ -137,10 +137,10 @@ public class MovieServiceImpl implements MovieService {
         return dto;
     }
 
-    private Actors addActor(List<ActorRequestDTO> newActor) {
-        Actors actorList;
+    private ActorsDTO addActor(List<ActorRequestDTO> newActor) {
+        ActorsDTO actorList;
         try {
-             actorList = restTemplate.postForObject("http://MS-ACTOR-SERVICE/actors", newActor, Actors.class);
+             actorList = restTemplate.postForObject("http://MS-ACTOR-SERVICE/actors", newActor, ActorsDTO.class);
         } catch (HttpClientErrorException ex) {
             throw new ExternalServiceException(ex.getMessage());
         }
@@ -150,30 +150,17 @@ public class MovieServiceImpl implements MovieService {
         return actorList;
     }
 
-    private ActorDTO getActor(UUID movieId) {
-        ActorDTO actor;
+    private ActorsDTO getActorsByMovieId(UUID movieId) {
+        ActorsDTO actorsDTO;
         try {
-            actor = restTemplate.getForObject("http://MS-ACTOR-SERVICE/actors/movie/" + movieId, ActorDTO.class);
-        } catch (HttpClientErrorException ex) {
-            throw new ActorException(ex.getMessage());
-        }
-        if(Objects.isNull(actor)) {
-            throw new ActorException("Actor id not found: " + movieId);
-        }
-        return actor;
-    }
-
-    private Actors getActorsByMovieId(UUID movieId) {
-        Actors actors;
-        try {
-            actors = restTemplate.getForObject("http://MS-ACTOR-SERVICE/actors/movie/" + movieId, Actors.class);
+            actorsDTO = restTemplate.getForObject("http://MS-ACTOR-SERVICE/actors/movie/" + movieId, ActorsDTO.class);
         } catch (HttpClientErrorException ex) {
             throw new ActorException(ex.getMessage());
         }
 
-        if (Objects.isNull(actors)) {
+        if (Objects.isNull(actorsDTO)) {
             throw new ActorException("Actors not found.");
         }
-        return actors;
+        return actorsDTO;
     }
 }

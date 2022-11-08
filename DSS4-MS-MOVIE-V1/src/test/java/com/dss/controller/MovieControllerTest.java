@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = MovieController.class)
-public class MovieControllerTest {
+class MovieControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
