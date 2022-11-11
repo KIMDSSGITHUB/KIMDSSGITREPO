@@ -55,7 +55,7 @@ public class MovieServiceImpl implements MovieService {
         log.info("Inside create");
         Movie movie = new Movie();
         dtoToEntity(request,movie);
-        movieRepository.save(movie);
+        Movie savedMovie = movieRepository.save(movie);
         List<ActorRequestDTO> actorRequestList = new ArrayList<>();
         for (ActorDTO actor: request.getActor()){
             ActorRequestDTO actorRequest = new ActorRequestDTO();
@@ -68,7 +68,7 @@ public class MovieServiceImpl implements MovieService {
         }
         ActorsResponseDTO restActor = addActor(actorRequestList);
         String message = "Movie added.";
-        return entityToDTO(movie,restActor.getActors(),new MovieResponseDTO(), message);
+        return entityToDTO(savedMovie,restActor.getActors(),new MovieResponseDTO(), message);
     }
 
     @Override
