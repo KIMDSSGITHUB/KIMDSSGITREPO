@@ -16,7 +16,7 @@ public class Dss3MsLoginV1Application {
 	}
 
 	@Bean
-	public PasswordEncoder encoder() {
+	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
 

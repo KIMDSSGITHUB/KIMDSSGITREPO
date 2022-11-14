@@ -29,8 +29,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDTO registration(UserRequestDTO request) {
-        //debugging
-        String tmpString = encoderUtil.encode("test");
         User user = new User();
         user.setEmail(request.getEmail());
         user.setFirstName(request.getFirstName());
@@ -38,8 +36,6 @@ public class UserServiceImpl implements UserService {
         user.setPhone(request.getPhone());
         user.setPassword(request.getPassword());
         user.setPassword(encoderUtil.encode(request.getPassword()));
-        //debugging
-        User userTemp = user;
 
         userRepository.findOneByEmail(request.getEmail()).ifPresent(c -> {
             throw new BadRequestException("Email already in use.");
