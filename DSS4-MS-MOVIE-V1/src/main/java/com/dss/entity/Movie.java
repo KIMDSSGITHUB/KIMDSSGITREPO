@@ -1,4 +1,4 @@
-package com.dss.entitty;
+package com.dss.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -4,7 +4,7 @@ import com.dss.dto.MovieDTO;
 import com.dss.dto.MovieRequestDTO;
 import com.dss.dto.MovieResponseDTO;
 import com.dss.dto.MovieUpdateDTO;
-import com.dss.entitty.Movie;
+import com.dss.entity.Movie;
 
 import java.util.List;
 import java.util.UUID;

@@ -1,7 +1,7 @@
 package com.dss.service;
 
 import com.dss.dto.*;
-import com.dss.entitty.Movie;
+import com.dss.entity.Movie;
 import com.dss.exception.ActorException;
 import com.dss.exception.ExternalServiceException;
 import com.dss.exception.MovieCannotBeDeletedException;

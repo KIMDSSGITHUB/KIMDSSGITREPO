@@ -1,7 +1,7 @@
 package com.dss.controller;
 
 import com.dss.dto.*;
-import com.dss.entitty.Movie;
+import com.dss.entity.Movie;
 import com.dss.service.MovieService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
