@@ -10,4 +10,10 @@ class Dss5MsActorV1ApplicationTests {
 	void contextLoads() {
 	}
 
+	@Test
+	void applicationContextTest() {
+		Dss5MsActorV1Application.main(new String[]{});
+		assert (true);
+	}
+
 }

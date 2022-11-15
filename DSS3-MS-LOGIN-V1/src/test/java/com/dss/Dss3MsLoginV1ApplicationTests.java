@@ -9,5 +9,10 @@ class Dss3MsLoginV1ApplicationTests {
 	@Test
 	void contextLoads() {
 	}
+	@Test
+	void applicationContextTest() {
+		Dss3MsLoginV1Application.main(new String[]{});
+		assert (true);
+	}
 
 }

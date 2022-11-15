@@ -1,7 +1,7 @@
 package com.dss.service;
 
 import com.dss.dto.*;
-import com.dss.entitty.Movie;
+import com.dss.entity.Movie;
 import com.dss.repository.MovieRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

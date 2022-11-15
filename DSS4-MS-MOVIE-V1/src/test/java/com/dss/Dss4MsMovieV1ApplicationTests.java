@@ -10,4 +10,9 @@ class Dss4MsMovieV1ApplicationTests {
 	void contextLoads() {
 	}
 
+	@Test
+	void applicationContextTest() {
+		Dss4MsMovieV1Application.main(new String[]{});
+		assert (true);
+	}
 }

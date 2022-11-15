@@ -20,6 +20,8 @@
 		<sonar.coverage.exclusions>
 			**/entity/*,
 			**/model/*,
+			**/util/*,
+			**/dto/*,
 			**/exception/*
 		</sonar.coverage.exclusions>
 	</properties>
