@@ -5,7 +5,7 @@ import com.dss.dto.UserLoginDTO;
 import com.dss.dto.UserRequestDTO;
 import com.dss.dto.UserResponseDTO;
 import com.dss.entity.User;
-import com.dss.exception.BadRequestException;
+import com.dss.exception.ConflictException;
 import com.dss.exception.InvalidCredentialsException;
 import com.dss.repository.UserRepository;
 import com.dss.util.EncoderUtil;
@@ -79,7 +79,7 @@ class UserServiceTest {
         User user = mockUser();
         UserRequestDTO userRequest = mockUserRequest();
     when(userRepository.findOneByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        BadRequestException exception = assertThrows(BadRequestException.class,
+        ConflictException exception = assertThrows(ConflictException.class,
                 () -> userService.registration(userRequest));
         assertEquals("Email already in use.", exception.getMessage());
     }

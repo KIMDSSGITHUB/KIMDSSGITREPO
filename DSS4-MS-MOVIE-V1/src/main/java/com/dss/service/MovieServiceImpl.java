@@ -155,7 +155,7 @@ public class MovieServiceImpl implements MovieService {
         try {
             actorsResponseDTO = restTemplate.getForObject("http://MS-ACTOR-SERVICE/actors/movie/" + movieId, ActorsResponseDTO.class);
         } catch (HttpClientErrorException ex) {
-            throw new ActorException(ex.getMessage());
+            throw new ExternalServiceException(ex.getMessage());
         }
 
         if (Objects.isNull(actorsResponseDTO)) {

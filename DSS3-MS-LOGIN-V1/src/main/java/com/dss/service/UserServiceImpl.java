@@ -6,7 +6,7 @@ import com.dss.dto.UserRequestDTO;
 import com.dss.dto.UserResponseDTO;
 import com.dss.entity.User;
 import com.dss.exception.AdminNotFoundException;
-import com.dss.exception.BadRequestException;
+import com.dss.exception.ConflictException;
 import com.dss.exception.InvalidCredentialsException;
 import com.dss.repository.UserRepository;
 import com.dss.util.EncoderUtil;
@@ -38,7 +38,10 @@ public class UserServiceImpl implements UserService {
         user.setPassword(encoderUtil.encode(request.getPassword()));
 
         userRepository.findOneByEmail(request.getEmail()).ifPresent(c -> {
-            throw new BadRequestException("Email already in use.");
+            throw new ConflictException("Email already in use.");
+        });
+        userRepository.findOneByPhone(request.getPhone()).ifPresent(c -> {
+            throw new ConflictException("Phone already in use.");
         });
          User userEntity= userRepository.save(user);
         return entityToDTO(new UserResponseDTO(), userEntity);

@@ -1,9 +1,9 @@
 package com.dss.exception;
 
-public class BadRequestException extends RuntimeException {
+public class ConflictException extends RuntimeException {
     private static final long serialVersionUID = 4853232046330404671L;
 
-    public BadRequestException(String message) {
+    public ConflictException(String message) {
         super(message);
     }
 }

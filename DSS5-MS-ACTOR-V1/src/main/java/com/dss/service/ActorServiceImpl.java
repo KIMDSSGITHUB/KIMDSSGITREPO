@@ -4,8 +4,10 @@ import com.dss.dto.ActorRequestDTO;
 import com.dss.dto.ActorsDTO;
 import com.dss.dto.MovieDTO;
 import com.dss.entity.Actor;
+import com.dss.exception.ActorCannotBeDeletedException;
 import com.dss.exception.ActorException;
 import com.dss.exception.ActorNotFoundException;
+import com.dss.exception.ExternalServiceException;
 import com.dss.repository.ActorRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,7 +91,7 @@ public class ActorServiceImpl  implements ActorService{
             Actor savedActor = getActorById(id);
             if (savedActor.getMovieId() == null){
             actorRepository.deleteById(id);
-            } else throw new ActorException("Actor cannot be deleted");
+            } else throw new ActorCannotBeDeletedException();
         } catch (EmptyResultDataAccessException e) {
             throw new ActorNotFoundException(id);
         }
@@ -109,7 +111,7 @@ public class ActorServiceImpl  implements ActorService{
         try {
             movie = restTemplate.getForObject("http://MS-MOVIE-SERVICE/movies/" + movieId, MovieDTO.class);
         } catch (HttpClientErrorException ex) {
-            throw new ActorException(ex.getMessage());
+            throw new ExternalServiceException(ex.getMessage());
         }
 
         if (Objects.isNull(movie)) {
