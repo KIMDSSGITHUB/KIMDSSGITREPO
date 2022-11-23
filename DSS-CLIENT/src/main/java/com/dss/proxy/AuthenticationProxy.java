@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name="ms-login-service")
+@FeignClient(name="api-gateway")
 public interface AuthenticationProxy {
 
 
 
-    @PostMapping("/user/login")
+    @PostMapping("/ms-login-service/user/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody UserLoginDTO login);
 
     @GetMapping("/user/instance")
