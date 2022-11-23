@@ -1,8 +1,6 @@
 package com.dss.controller;
 
-import com.dss.dto.MovieDTO;
 import com.dss.dto.MovieRequestDTO;
-import com.dss.dto.MovieResponseDTO;
 import com.dss.dto.MovieUpdateDTO;
 import com.dss.entity.Movie;
 import com.dss.service.MovieService;
@@ -22,17 +20,17 @@ public class MovieController {
     private MovieService movieService;
 
     @GetMapping()
-    public ResponseEntity<List<MovieDTO>> getMovies() {
+    public ResponseEntity<List<Movie>> getMovies() {
         return new ResponseEntity<>(movieService.getMovies(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MovieDTO> getMovie(@PathVariable UUID id) {
+    public ResponseEntity<Movie> getMovie(@PathVariable UUID id) {
         return new ResponseEntity<>(movieService.getMovieById(id), HttpStatus.OK);
     }
 
     @PostMapping()
-    public ResponseEntity<MovieResponseDTO> create(@RequestBody MovieRequestDTO request) {
+    public ResponseEntity<Movie> create(@RequestBody MovieRequestDTO request) {
         return new ResponseEntity<>(movieService.create(request), HttpStatus.CREATED);
     }
 
@@ -45,7 +43,5 @@ public class MovieController {
     public ResponseEntity<String> delete(@PathVariable UUID id) {
         return new ResponseEntity<>(movieService.delete(id),HttpStatus.OK);
     }
-
-
 
 }

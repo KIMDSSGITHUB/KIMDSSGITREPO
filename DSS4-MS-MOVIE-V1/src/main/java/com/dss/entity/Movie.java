@@ -3,9 +3,13 @@ package com.dss.entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -28,4 +32,13 @@ public class Movie {
     private double cost;
     @Column(name = "year_of_release", nullable = false)
     private int yrOfRelease;
+
+    @ManyToMany
+    @Fetch(FetchMode.JOIN)
+    @JoinTable(
+            name = "movieActors",
+            joinColumns = @JoinColumn(name = "movie_id"),
+            inverseJoinColumns = @JoinColumn(name = "actor_id")
+    )
+    private Set<Actor> actors = new HashSet<>();
 }

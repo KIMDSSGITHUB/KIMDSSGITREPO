@@ -1,23 +1,22 @@
 package com.dss.service;
 
-import com.dss.dto.*;
+import com.dss.dto.MovieRequestDTO;
+import com.dss.dto.MovieUpdateDTO;
+import com.dss.entity.Actor;
 import com.dss.entity.Movie;
 import com.dss.exception.ActorException;
-import com.dss.exception.ExternalServiceException;
+import com.dss.exception.MovieAlreadyExistException;
 import com.dss.exception.MovieCannotBeDeletedException;
 import com.dss.exception.MovieNotFoundException;
 import com.dss.repository.MovieRepository;
+import com.dss.util.FeignServiceUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -28,47 +27,27 @@ public class MovieServiceImpl implements MovieService {
     private MovieRepository movieRepository;
 
     @Autowired
-    private RestTemplate restTemplate;
+    private FeignServiceUtil feignServiceUtil;
 
     @Override
-    public List<MovieDTO> getMovies() {
-        List<Movie> movies;
-        movies = movieRepository.findAll();
-        List<MovieDTO> movieList = new ArrayList<>();
-        for (Movie movie: movies){
-            movieList.add(getMovieById(movie.getMovieId()));
-        }
-        return movieList;
+    public List<Movie> getMovies() {
+        return movieRepository.findAll();
     }
 
     @Override
-    public MovieDTO getMovieById(UUID id) {
+    public Movie getMovieById(UUID id) {
         log.info("Inside getMovieByMovieId with Id: " + id);
-        ActorsResponseDTO actorsResponseDTO = getActorsByMovieId(id);
-        Movie savedMovie = movieRepository.findById(id)
+        return movieRepository.findById(id)
                 .orElseThrow(() -> new MovieNotFoundException(id));
-        return entityToMovieDTO(savedMovie, actorsResponseDTO,new MovieDTO());
     }
 
     @Override
-    public MovieResponseDTO create(MovieRequestDTO request) {
+    public Movie create(MovieRequestDTO request) {
         log.info("Inside create");
+        validate(request);
         Movie movie = new Movie();
         dtoToEntity(request,movie);
-        Movie savedMovie = movieRepository.save(movie);
-        List<ActorRequestDTO> actorRequestList = new ArrayList<>();
-        for (ActorDTO actor: request.getActor()){
-            ActorRequestDTO actorRequest = new ActorRequestDTO();
-            actorRequest.setFirstName(actor.getFirstName());
-            actorRequest.setLastName(actor.getLastName());
-            actorRequest.setGender(actor.getGender());
-            actorRequest.setAge(actor.getAge());
-            actorRequest.setMovieId(movie.getMovieId());
-            actorRequestList.add(actorRequest);
-        }
-        ActorsResponseDTO restActor = addActor(actorRequestList);
-        String message = "Movie added.";
-        return entityToDTO(savedMovie,restActor.getActors(),new MovieResponseDTO(), message);
+        return movieRepository.save(movie);
     }
 
     @Override
@@ -84,7 +63,7 @@ public class MovieServiceImpl implements MovieService {
     public String delete(UUID id) {
         log.info("Inside delete with id: " + id);
         try {
-            MovieDTO savedMovie = getMovieById(id);
+            Movie savedMovie = getMovieById(id);
             int yrOfTheMovie = savedMovie.getYrOfRelease();
             LocalDate date = LocalDate.of(yrOfTheMovie,1,1);
             LocalDate today = LocalDate.now();
@@ -100,6 +79,7 @@ public class MovieServiceImpl implements MovieService {
     private Movie dtoToEntity(MovieRequestDTO dto, Movie entity) {
         entity.setImage(dto.getImage());
         entity.setMovieTitle(dto.getMovieTitle());
+        entity.setActors(dto.getActors());
         entity.setCost(dto.getCost());
         entity.setYrOfRelease(dto.getYrOfRelease());
         return entity;
@@ -111,56 +91,26 @@ public class MovieServiceImpl implements MovieService {
         return entity;
     }
 
-    private MovieDTO entityToMovieDTO(Movie entity, ActorsResponseDTO actor, MovieDTO dto) {
-        dto.setMovieId(entity.getMovieId());
-        dto.setImage(entity.getImage());
-        dto.setMovieTitle(entity.getMovieTitle());
-        dto.setActor(actor.getActors());
-        dto.setCost(entity.getCost());
-        dto.setYrOfRelease(entity.getYrOfRelease());
-        return dto;
-    }
-
-    private MovieResponseDTO entityToDTO(Movie entity,List<ActorDTO> actors,MovieResponseDTO dto, String message) {
-        for(ActorDTO actor: actors){
-        actor.setMovieId(entity.getMovieId());
-        }
-        MovieDTO toMovie = new MovieDTO();
-        toMovie.setMovieId(entity.getMovieId());
-        toMovie.setImage(entity.getImage());
-        toMovie.setMovieTitle(entity.getMovieTitle());
-        toMovie.setActor(actors);
-        toMovie.setCost(entity.getCost());
-        toMovie.setYrOfRelease(entity.getYrOfRelease());
-        dto.setMovie(toMovie);
-        dto.setMessage(message);
-        return dto;
-    }
-
-    private ActorsResponseDTO addActor(List<ActorRequestDTO> newActor) {
-        ActorsResponseDTO actorList;
-        try {
-             actorList = restTemplate.postForObject("http://MS-ACTOR-SERVICE/actors", newActor, ActorsResponseDTO.class);
-        } catch (HttpClientErrorException ex) {
-            throw new ExternalServiceException(ex.getMessage());
-        }
-        if(Objects.isNull(actorList)) {
-            throw new ExternalServiceException("Actor not created.");
-        }
-        return actorList;
-    }
-
-    private ActorsResponseDTO getActorsByMovieId(UUID movieId) {
-        ActorsResponseDTO actorsResponseDTO;
-        try {
-            actorsResponseDTO = restTemplate.getForObject("http://MS-ACTOR-SERVICE/actors/movie/" + movieId, ActorsResponseDTO.class);
-        } catch (HttpClientErrorException ex) {
-            throw new ExternalServiceException(ex.getMessage());
+    public void validate(MovieRequestDTO request) {
+//        if (request.getMovieTitle() == null || request.getCost() == 0 || request.getYrOfRelease() == 0 || request.getImage() == null || request.getActors().isEmpty()) {
+//            //• Display proper messages in case of errors or exceptions
+//            throw new InvalidInputException("Please fill all details");
+//        }
+        for (Actor actor : request.getActors()) {
+            //find actor if existing using feign actor
+            try {
+                feignServiceUtil.findActor(actor.getActorId());
+            } catch (Exception e) {
+                throw new ActorException("Actor " + actor.getFirstName() + " " + actor.getLastName() + " does not exist");
+            }
         }
 
-        if (Objects.isNull(actorsResponseDTO)) {
-            throw new ActorException("Actors not found.");
+        if (request.getMovieTitle() != null) {
+            Movie movie = movieRepository.findByMovieTitle(request.getMovieTitle());
+            if (movie != null){
+            throw new MovieAlreadyExistException("Movie already exist");
+            }
         }
-        return actorsResponseDTO;
     }
+
 }

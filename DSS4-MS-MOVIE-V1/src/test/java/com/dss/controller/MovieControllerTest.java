@@ -1,6 +1,8 @@
 package com.dss.controller;
 
-import com.dss.dto.*;
+import com.dss.dto.MovieRequestDTO;
+import com.dss.dto.MovieUpdateDTO;
+import com.dss.entity.Actor;
 import com.dss.entity.Movie;
 import com.dss.service.MovieService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -36,50 +38,49 @@ class MovieControllerTest {
     private MovieService movieService;
 
     private static final UUID MOVIE_ID = UUID.randomUUID();
-    private static final MovieDTO RES = new MovieDTO();
-    private static final MovieRequestDTO REQ = new MovieRequestDTO();
+    private static final UUID ACTOR_ID = UUID.randomUUID();
     private static final MovieUpdateDTO UPDATE_REQ = new MovieUpdateDTO();
-    private static final MovieResponseDTO CREATE_RES = new MovieResponseDTO();
     private static final Movie UPDATE_RES = new Movie();
 
     @Test
     @DisplayName("GET: Get Movies")
     void getMovies() throws Exception {
-        List<MovieDTO> movies = Collections.singletonList(mockMovie());
+        List<Movie> movies = Collections.singletonList(mockMovie());
         when(movieService.getMovies()).thenReturn(movies);
 
         MvcResult result = this.mockMvc.perform(get("/movies"))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        assertEquals(movies, asObjectList(result.getResponse().getContentAsString(),new TypeReference<List<MovieDTO>>() {}));
+        assertEquals(movies, asObjectList(result.getResponse().getContentAsString(),new TypeReference<List<Movie>>() {}));
     }
 
 
     @Test
     @DisplayName("GET: Movie By Id")
     void getMovie() throws Exception {
-        MovieDTO movie = mockMovie();
+        Movie movie = mockMovie();
         when(movieService.getMovieById(MOVIE_ID)).thenReturn(movie);
 
         MvcResult result = this.mockMvc.perform(get("/movies/{id}", MOVIE_ID))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        assertEquals(movie, asObject(result.getResponse().getContentAsString(), MovieDTO.class));
+        assertEquals(movie, asObject(result.getResponse().getContentAsString(), Movie.class));
     }
 
     @Test
     @DisplayName("POST: Create Movie")
     void createMovie() throws Exception {
-        when(movieService.create(REQ)).thenReturn(CREATE_RES);
+        MovieRequestDTO req = new MovieRequestDTO(mockMovie().getImage(),mockMovie().getMovieTitle(),mockMovie().getActors(),mockMovie().getCost(),mockMovie().getYrOfRelease());
+        when(movieService.create(req)).thenReturn(mockMovie());
 
         MvcResult result = this.mockMvc.perform(post("/movies").contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(CREATE_RES)))
+                        .content(asJsonString(req)))
                 .andExpect(status().isCreated())
                 .andReturn();
 
-        assertEquals(CREATE_RES, asObject(result.getResponse().getContentAsString(), MovieResponseDTO.class));
+        assertEquals(mockMovie(), asObject(result.getResponse().getContentAsString(), Movie.class));
     }
 
     @Test
@@ -106,26 +107,24 @@ class MovieControllerTest {
         assertEquals("Success", result.getResponse().getContentAsString());
     }
 
-    private MovieDTO mockMovie(){
-       MovieDTO movie = new MovieDTO();
-       UUID movieId = UUID.randomUUID();
-       movie.setMovieId(movieId);
+    private Movie mockMovie(){
+       Movie movie = new Movie();
+       movie.setMovieId(MOVIE_ID);
        movie.setImage("Batman.jpg");
        movie.setMovieTitle("Batman");
-       movie.setActor(Collections.singletonList(mockActors(movieId)));
+       movie.setActors(Collections.singleton(mockActors()));
        movie.setCost(2300000);
        movie.setYrOfRelease(2019);
        return movie;
     }
 
-    private ActorDTO mockActors(UUID movieId){
-        ActorDTO actor = new ActorDTO();
-        actor.setActorId(UUID.randomUUID());
+    private Actor mockActors(){
+        Actor actor = new Actor();
+        actor.setActorId(ACTOR_ID);
         actor.setFirstName("Daniel");
         actor.setLastName("Craig");
         actor.setGender("Male");
         actor.setAge(45);
-        actor.setMovieId(movieId);
         return actor;
     }
 
