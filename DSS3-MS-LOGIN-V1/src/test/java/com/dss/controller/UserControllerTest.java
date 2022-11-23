@@ -43,8 +43,8 @@ class UserControllerTest {
 
     private static final UserRequestDTO REQ = new UserRequestDTO(FIRSTNAME, LASTNAME, EMAIL, PHONE ,PW);
     private static final UserResponseDTO RES = new UserResponseDTO(UUID.randomUUID(), FIRSTNAME, LASTNAME, EMAIL, PHONE);
-    private static final LoginResponseDTO LOGIN_RES = new LoginResponseDTO();
-    private static final UserLoginDTO LOGIN_REQ = new UserLoginDTO();
+    private static final LoginResponseDTO LOGIN_RES = new LoginResponseDTO("Success","eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJVc2VyIFNlcnZpY2UiLCJzdWIiOiI5MTcyZGUyNS0zMTBlLTRmNGUtYjkyMC05MGVhMzc2YzcwZDMiLCJpYXQiOjE2Njc4MDM1MjMsImV4cCI6MTY2NzgwNDQyMywidXNlciI6InJ1c3NlckBnbWFpbC5jb20ifQ.AquWFWo6d3wPnWjtSy7jpgovEbkemeN56Cbg1YX8zuhytbz8ADNBWZqn7Y6qRyuA2dniG_W4mjWhw56TIZB3fw");
+    private static final UserLoginDTO LOGIN_REQ = new UserLoginDTO(EMAIL,PW);
 
     @Test
     @DisplayName("POST: Registration")
