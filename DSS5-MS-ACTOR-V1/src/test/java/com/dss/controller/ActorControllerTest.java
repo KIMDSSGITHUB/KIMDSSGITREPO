@@ -1,8 +1,6 @@
 package com.dss.controller;
 
 import com.dss.dto.ActorRequestDTO;
-import com.dss.dto.ActorsDTO;
-import com.dss.dto.MovieDTO;
 import com.dss.entity.Actor;
 import com.dss.service.ActorService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -38,7 +36,6 @@ class ActorControllerTest {
     private ActorService actorService;
 
     private static final UUID ACTOR_ID = UUID.randomUUID();
-    private static final UUID MOVIE_ID = UUID.randomUUID();
 
     private static final ActorRequestDTO REQ = new ActorRequestDTO();
     private static final Actor UPDATE_RES = new Actor();
@@ -70,43 +67,16 @@ class ActorControllerTest {
     }
 
     @Test
-    @DisplayName("GET: Actor By Movie Id")
-    void getActorByMovie() throws Exception {
-        ActorsDTO actorsDTO = mockActors();
-        when(actorService.getActorByMovieId(MOVIE_ID)).thenReturn(actorsDTO);
-
-        MvcResult result = this.mockMvc.perform(get("/actors/movie/{id}", MOVIE_ID))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        assertEquals(actorsDTO, asObject(result.getResponse().getContentAsString(), ActorsDTO.class));
-    }
-
-    @Test
-    @DisplayName("GET: Movie By Actor Id")
-    void getMovieByActor() throws Exception {
-        MovieDTO movie = mockMovie();
-        when(actorService.getMovieByActorId(ACTOR_ID)).thenReturn(movie);
-
-        MvcResult result = this.mockMvc.perform(get("/actors/{id}/movie", ACTOR_ID))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        assertEquals(movie, asObject(result.getResponse().getContentAsString(), MovieDTO.class));
-    }
-
-    @Test
     @DisplayName("POST: Create Actor")
     void createActor() throws Exception {
-        List<ActorRequestDTO> req = Collections.singletonList(mockCreateActor());
-        when(actorService.create(req)).thenReturn(mockActors());
+        when(actorService.create(mockCreateActor())).thenReturn(mockActor());
 
         MvcResult result = this.mockMvc.perform(post("/actors").contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(req)))
+                        .content(asJsonString(mockCreateActor())))
                 .andExpect(status().isCreated())
                 .andReturn();
 
-        assertEquals(mockActors(), asObject(result.getResponse().getContentAsString(), ActorsDTO.class));
+        assertEquals(mockActor(), asObject(result.getResponse().getContentAsString(), Actor.class));
     }
 
     @Test
@@ -160,13 +130,11 @@ class ActorControllerTest {
 
     private Actor mockActor(){
         Actor actor = new Actor();
-        UUID actorId = UUID.randomUUID();
         actor.setActorId(ACTOR_ID);
         actor.setFirstName("Tom");
         actor.setLastName("Cruise");
         actor.setGender("Male");
         actor.setAge(60);
-        actor.setMovieId(MOVIE_ID);
         return actor;
     }
 
@@ -176,23 +144,6 @@ class ActorControllerTest {
         actor.setLastName("Cruise");
         actor.setGender("Male");
         actor.setAge(60);
-        actor.setMovieId(MOVIE_ID);
         return actor;
-    }
-
-    private ActorsDTO mockActors(){
-        ActorsDTO actorsDTO = new ActorsDTO();
-        actorsDTO.setActors(Collections.singletonList(mockActor()));
-        return actorsDTO;
-    }
-
-    private MovieDTO mockMovie(){
-        MovieDTO movie = new MovieDTO();
-        movie.setMovieId(UUID.randomUUID());
-        movie.setImage("Top Gun.jpg");
-        movie.setMovieTitle("Top Gun");
-        movie.setCost(15000000);
-        movie.setYrOfRelease(1986);
-        return movie;
     }
 }

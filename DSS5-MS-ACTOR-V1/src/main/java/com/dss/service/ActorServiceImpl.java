@@ -1,24 +1,18 @@
 package com.dss.service;
 
 import com.dss.dto.ActorRequestDTO;
-import com.dss.dto.ActorsDTO;
-import com.dss.dto.MovieDTO;
 import com.dss.entity.Actor;
+import com.dss.entity.MovieActor;
 import com.dss.exception.ActorCannotBeDeletedException;
-import com.dss.exception.ActorException;
 import com.dss.exception.ActorNotFoundException;
-import com.dss.exception.ExternalServiceException;
 import com.dss.repository.ActorRepository;
+import com.dss.repository.MovieActorRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -29,13 +23,11 @@ public class ActorServiceImpl  implements ActorService{
     private ActorRepository actorRepository;
 
     @Autowired
-    RestTemplate restTemplate;
+    private MovieActorRepository movieActorRepository;
 
     @Override
     public List<Actor> getActors() {
-        List<Actor> actors;
-        actors = actorRepository.findAll();
-        return actors;
+        return actorRepository.findAll();
     }
 
     @Override
@@ -46,33 +38,11 @@ public class ActorServiceImpl  implements ActorService{
     }
 
     @Override
-    public ActorsDTO getActorByMovieId(UUID id) {
-        log.info("Inside getActorByMovieId with Id: " + id);
-        ActorsDTO actorsDTO = new ActorsDTO();
-        actorsDTO.setActors(actorRepository.findActorsByMovieId(id).orElseThrow(() -> new ActorNotFoundException(id)));
-        return actorsDTO;
-    }
-
-    @Override
-    public MovieDTO getMovieByActorId(UUID id) {
-        Actor savedActor = getActorById(id);
-        UUID movieId = savedActor.getMovieId();
-        return getMoviesByMovieId(movieId);
-    }
-
-
-    @Override
-    public ActorsDTO create(List<ActorRequestDTO> request) {
+    public Actor create(ActorRequestDTO request) {
         log.info("Inside create");
-        List<Actor> actorList = new ArrayList<>();
-        for (ActorRequestDTO requests: request) {
         Actor actor = new Actor();
-        dtoToEntity(requests,actor);
-        actorList.add(actorRepository.save(actor));
-        }
-        ActorsDTO savedActorsDTO = new ActorsDTO();
-        savedActorsDTO.setActors(actorList);
-        return savedActorsDTO;
+        dtoToEntity(request,actor);
+        return actorRepository.save(actor);
     }
 
     @Override
@@ -88,8 +58,9 @@ public class ActorServiceImpl  implements ActorService{
     public String delete(UUID id) {
         log.info("Inside delete with id: " + id);
         try{
-            Actor savedActor = getActorById(id);
-            if (savedActor.getMovieId() == null){
+            getActorById(id);
+            List<MovieActor> savedMovieActor = movieActorRepository.findByActorId(id);
+            if (savedMovieActor.isEmpty()){
             actorRepository.deleteById(id);
             } else throw new ActorCannotBeDeletedException();
         } catch (EmptyResultDataAccessException e) {
@@ -103,20 +74,6 @@ public class ActorServiceImpl  implements ActorService{
         entity.setLastName(dto.getLastName());
         entity.setGender(dto.getGender());
         entity.setAge(dto.getAge());
-        entity.setMovieId(dto.getMovieId());
         return entity;
-    }
-    private MovieDTO getMoviesByMovieId(UUID movieId) {
-        MovieDTO movie;
-        try {
-            movie = restTemplate.getForObject("http://MS-MOVIE-SERVICE/movies/" + movieId, MovieDTO.class);
-        } catch (HttpClientErrorException ex) {
-            throw new ExternalServiceException(ex.getMessage());
-        }
-
-        if (Objects.isNull(movie)) {
-            throw new ActorException("Actors not found.");
-        }
-        return movie;
     }
 }

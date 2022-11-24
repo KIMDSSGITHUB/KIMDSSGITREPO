@@ -2,8 +2,10 @@ package com.dss.service;
 
 import com.dss.dto.ReviewRequestDTO;
 import com.dss.entity.Review;
+import com.dss.exception.MovieNotFoundException;
 import com.dss.exception.ReviewNotFoundException;
 import com.dss.repository.ReviewRepository;
+import com.dss.util.FeignServiceUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -19,11 +21,12 @@ public class ReviewServiceImpl implements ReviewService{
     @Autowired
     private ReviewRepository reviewRepository;
 
+    @Autowired
+    private FeignServiceUtil feignServiceUtil;
+
     @Override
     public List<Review> getReviews() {
-        List<Review> reviews;
-        reviews = reviewRepository.findAll();
-        return reviews;
+        return reviewRepository.findAll();
     }
 
     @Override
@@ -34,15 +37,9 @@ public class ReviewServiceImpl implements ReviewService{
     }
 
     @Override
-    public List<Review> getReviewsByMovie(UUID id) {
-        log.info("Inside getReviewsByMovieId with Id: " + id);
-        return reviewRepository.findReviewsByMovieId(id)
-                .orElseThrow(() -> new ReviewNotFoundException(id));
-    }
-
-    @Override
     public Review create(ReviewRequestDTO request) {
         log.info("Inside create");
+        validate(request);
         Review review = new Review();
         dtoToEntity(request,review);
         return reviewRepository.save(review);
@@ -71,7 +68,15 @@ public class ReviewServiceImpl implements ReviewService{
     private Review dtoToEntity(ReviewRequestDTO dto, Review entity) {
         entity.setDescription(dto.getDescription());
         entity.setRating(dto.getRating());
-        entity.setMovieId(dto.getMovieId());
+        entity.setMovie(dto.getMovie());
         return entity;
+    }
+
+    public void validate(ReviewRequestDTO review) {
+        try {
+            feignServiceUtil.findMovie(review.getMovie().getMovieId());
+        } catch (Exception e) {
+            throw new MovieNotFoundException("Movie does not exist");
+        }
     }
 }

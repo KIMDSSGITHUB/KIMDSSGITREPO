@@ -36,7 +36,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     private ReviewService reviewService;
 
     private static final UUID REVIEW_ID = UUID.randomUUID();
-    private static final UUID MOVIE_ID = UUID.randomUUID();
     private static final ReviewRequestDTO REQ = new ReviewRequestDTO();
     private static final Review RES = new Review();
 
@@ -66,18 +65,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         assertEquals(review, asObject(result.getResponse().getContentAsString(), Review.class));
     }
 
-    @Test
-    @DisplayName("GET: Reviews By Movie Id")
-    void getActorByMovie() throws Exception {
-        List<Review> reviews = Collections.singletonList(mockReview());
-        when(reviewService.getReviewsByMovie(MOVIE_ID)).thenReturn(reviews);
-
-        MvcResult result = this.mockMvc.perform(get("/reviews/movie/{id}", MOVIE_ID))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        assertEquals(reviews, asObjectList(result.getResponse().getContentAsString(),new TypeReference<List<Review>>() {}));
-    }
 
     @Test
     @DisplayName("POST: Create Review")
@@ -118,11 +105,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
     private Review mockReview() {
         Review review = new Review();
-        UUID movieId = UUID.randomUUID();
-        review.setReviewId(UUID.randomUUID());
+        review.setReviewId(REVIEW_ID);
         review.setDescription("About Gotham");
         review.setRating(5);
-        review.setMovieId(movieId);
         return review;
     }
 

@@ -1,8 +1,6 @@
 package com.dss.controller;
 
 import com.dss.dto.ActorRequestDTO;
-import com.dss.dto.ActorsDTO;
-import com.dss.dto.MovieDTO;
 import com.dss.entity.Actor;
 import com.dss.service.ActorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,17 +29,9 @@ public class ActorController {
         return new ResponseEntity<>(actorService.getActorById(id), HttpStatus.OK);
     }
 
-    @GetMapping("/movie/{id}")
-    public ResponseEntity<ActorsDTO> getActorByMovie(@PathVariable UUID id) {
-        return new ResponseEntity<>(actorService.getActorByMovieId(id), HttpStatus.OK);
-    }
-    @GetMapping("/{id}/movie")
-    public ResponseEntity<MovieDTO> getMovieByActor(@PathVariable UUID id) {
-        return new ResponseEntity<>(actorService.getMovieByActorId(id), HttpStatus.OK);
-    }
 
     @PostMapping()
-    public ResponseEntity<ActorsDTO> create(@RequestBody List<ActorRequestDTO> request) {
+    public ResponseEntity<Actor> create(@RequestBody ActorRequestDTO request) {
         return new ResponseEntity<>(actorService.create(request), HttpStatus.CREATED);
     }
 

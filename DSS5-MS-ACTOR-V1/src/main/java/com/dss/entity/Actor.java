@@ -27,6 +27,4 @@ public class Actor {
     private String gender;
     @Column(name = "age",nullable = false)
     private int age;
-    @Column(name = "movie_id")
-    private UUID movieId;
 }

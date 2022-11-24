@@ -29,11 +29,6 @@ public class ReviewController {
         return new ResponseEntity<>(reviewService.getReviewById(id), HttpStatus.OK);
     }
 
-    @GetMapping("/movie/{id}")
-    public ResponseEntity<List<Review>> getReviewsByMovieId(@PathVariable UUID id) {
-        return new ResponseEntity<>(reviewService.getReviewsByMovie(id), HttpStatus.OK);
-    }
-
     @PostMapping()
     public ResponseEntity<Review> create(@RequestBody ReviewRequestDTO request) {
         return new ResponseEntity<>(reviewService.create(request), HttpStatus.CREATED);

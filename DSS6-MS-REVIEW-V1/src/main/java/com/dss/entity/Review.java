@@ -33,6 +33,7 @@ public class Review {
     @Column(name = "rating")
     private int rating;
 
-    @Column(name = "movie_id")
-    private UUID movieId;
+    @ManyToOne
+    @JoinColumn(name="movie_id", referencedColumnName = "movie_Id")
+    private Movie movie;
 }

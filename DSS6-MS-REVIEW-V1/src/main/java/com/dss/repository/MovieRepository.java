@@ -1,9 +1,9 @@
 package com.dss.repository;
 
-import com.dss.entity.Actor;
+import com.dss.entity.Movie;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
 
-public interface ActorRepository extends JpaRepository<Actor, UUID> {
+public interface MovieRepository extends JpaRepository<Movie, UUID> {
 }
