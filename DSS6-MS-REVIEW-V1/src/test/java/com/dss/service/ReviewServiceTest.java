@@ -5,6 +5,7 @@ import com.dss.entity.Movie;
 import com.dss.entity.Review;
 import com.dss.exception.MovieNotFoundException;
 import com.dss.exception.ReviewNotFoundException;
+import com.dss.repository.MovieRepository;
 import com.dss.repository.ReviewRepository;
 import com.dss.util.FeignServiceUtil;
 import org.junit.jupiter.api.DisplayName;
@@ -27,6 +28,8 @@ import static org.mockito.Mockito.*;
 
     @Mock
     private ReviewRepository reviewRepository;
+    @Mock
+    private MovieRepository movieRepository;
     @Mock
     private FeignServiceUtil feignServiceUtil;
 
@@ -74,36 +77,31 @@ import static org.mockito.Mockito.*;
     @Test
     @DisplayName("Create Review")
     void createReview() {
-        when(reviewRepository.save(mockReqReview())).thenReturn(mockReview());
         when(feignServiceUtil.findMovie(MOVIE_ID)).thenReturn(mockMovie());
+        when(reviewRepository.save(mockReqReview())).thenReturn(mockReview());
         Review res = reviewService.create(mockRequestReview());
         assertEquals(mockReview(), res);
     }
     @Test
     @DisplayName("Create Review but Movie does not exist")
     void createReviewButMovieDoesNotExist() {
-        ReviewRequestDTO review = mockRequestReview();
-        when(reviewRepository.save(mockReqReview())).thenReturn(mockReview());
-        when(feignServiceUtil.findMovie(MOVIE_ID)).thenReturn(mockMovie());
-//        Review res = reviewService.create(mockRequestReview());
-        MovieNotFoundException exception = assertThrows(MovieNotFoundException.class,
-                () -> reviewService.create(REQ));
-
+        ReviewRequestDTO request = mockRequestReviewInc();
+        when(feignServiceUtil.findMovie(MOVIE_ID)).thenReturn(mockMovieNull());
+                MovieNotFoundException exception = assertThrows(MovieNotFoundException.class,
+                () -> reviewService.create(request));
         assertEquals("Movie does not exist", exception.getMessage());
-//        assertEquals(mockReview(), res);
     }
-
     @Test
     @DisplayName("Update Review When Review Exists")
-    void updateProductRecordWhenProductExists() {
-        Optional<Review> optionalReview = Optional.of(REVIEW);
+    void updateReviewWhenReviewExists() {
+        Optional<Review> optionalReview = Optional.of(mockReview());
+        when(feignServiceUtil.findMovie(MOVIE_ID)).thenReturn(mockMovie());
+        when(reviewRepository.findById(mockReview().getReviewId())).thenReturn(optionalReview);
+        when(reviewRepository.save(mockReview())).thenReturn(mockReview());
 
-        when(reviewRepository.findById(ID)).thenReturn(optionalReview);
-        when(reviewRepository.save(REVIEW)).thenReturn(REVIEW);
+        Review res = reviewService.update(mockReview().getReviewId(), mockRequestReview());
 
-        Review res = reviewService.update(ID, REQ);
-
-        assertEquals(REVIEW, res);
+        assertEquals(mockReview(), res);
     }
 
     @Test
@@ -119,7 +117,15 @@ import static org.mockito.Mockito.*;
         ReviewRequestDTO requestReview = new ReviewRequestDTO();
         requestReview.setDescription(mockReview().getDescription());
         requestReview.setRating(mockReview().getRating());
-        requestReview.setMovie(mockMovie());
+        requestReview.setMovieId(mockMovie().getMovieId());
+        return requestReview;
+    }
+    private ReviewRequestDTO mockRequestReviewInc(){
+        ReviewRequestDTO requestReview = new ReviewRequestDTO();
+        UUID wrongId = UUID.fromString("4b7854a2-3a42-433b-ad16-d88a383d8e11");
+        requestReview.setDescription(mockReview().getDescription());
+        requestReview.setRating(mockReview().getRating());
+        requestReview.setMovieId(wrongId);
         return requestReview;
     }
     private Review mockReqReview(){
@@ -137,6 +143,15 @@ import static org.mockito.Mockito.*;
         review.setMovie(mockMovie());
         return review;
     }
+    private Movie mockMovieNull() {
+        Movie movie = new Movie();
+        movie.setMovieId(MOVIE_ID);
+        movie.setMovieTitle("Batman");
+        movie.setImage("Batman.jpg");
+        movie.setCost(30000);
+        movie.setYrOfRelease(2021);
+        return null;
+    }
     private Movie mockMovie() {
         Movie movie = new Movie();
         movie.setMovieId(MOVIE_ID);
@@ -144,7 +159,6 @@ import static org.mockito.Mockito.*;
         movie.setImage("Batman.jpg");
         movie.setCost(30000);
         movie.setYrOfRelease(2021);
-        movie.setReviews(null);
         return movie;
     }
 }

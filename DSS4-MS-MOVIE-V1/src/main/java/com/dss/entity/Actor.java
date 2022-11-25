@@ -2,8 +2,9 @@ package com.dss.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
@@ -12,7 +13,8 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "actor")
@@ -32,4 +34,5 @@ public class Actor {
     @JsonIgnore
     @ManyToMany(mappedBy = "actors")
     private Set<Movie> movies = new HashSet<>();
+
 }

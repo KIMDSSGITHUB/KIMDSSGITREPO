@@ -14,7 +14,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "movieActor")
+@Table(name = "movieActors")
 public class MovieActor {
 
     @Id

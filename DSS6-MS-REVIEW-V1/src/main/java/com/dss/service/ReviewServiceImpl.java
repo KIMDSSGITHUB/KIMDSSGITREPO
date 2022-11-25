@@ -1,6 +1,7 @@
 package com.dss.service;
 
 import com.dss.dto.ReviewRequestDTO;
+import com.dss.entity.Movie;
 import com.dss.entity.Review;
 import com.dss.exception.MovieNotFoundException;
 import com.dss.exception.ReviewNotFoundException;
@@ -41,7 +42,8 @@ public class ReviewServiceImpl implements ReviewService{
         log.info("Inside create");
         validate(request);
         Review review = new Review();
-        dtoToEntity(request,review);
+        Movie savedMovie = findByMovieId(request.getMovieId());
+        dtoToEntity(request,review, savedMovie);
         return reviewRepository.save(review);
     }
 
@@ -49,7 +51,8 @@ public class ReviewServiceImpl implements ReviewService{
     public Review update(UUID id, ReviewRequestDTO request) {
         log.info("Inside update with id: " + id);
         return reviewRepository.findById(id).map(review -> {
-            dtoToEntity(request, review);
+            Movie savedMovie = findByMovieId(request.getMovieId());
+            dtoToEntity(request, review, savedMovie);
             return reviewRepository.save(review);
         }).orElseThrow(() -> new ReviewNotFoundException(id));
     }
@@ -65,18 +68,26 @@ public class ReviewServiceImpl implements ReviewService{
         return "Successfully deleted review with id: " + id;
     }
 
-    private Review dtoToEntity(ReviewRequestDTO dto, Review entity) {
+    private Review dtoToEntity(ReviewRequestDTO dto, Review entity, Movie movie) {
         entity.setDescription(dto.getDescription());
         entity.setRating(dto.getRating());
-        entity.setMovie(dto.getMovie());
+        entity.setMovie(movie);
         return entity;
     }
 
     public void validate(ReviewRequestDTO review) {
         try {
-            feignServiceUtil.findMovie(review.getMovie().getMovieId());
+            findByMovieId(review.getMovieId());
         } catch (Exception e) {
             throw new MovieNotFoundException("Movie does not exist");
         }
+    }
+    private Movie findByMovieId(UUID movieId) {
+        Movie movie = null;
+        movie = feignServiceUtil.findMovie(movieId);
+                if(movie == null){
+        throw new MovieNotFoundException("Movie does not exist");
+                }
+       return movie;
     }
 }

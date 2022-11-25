@@ -15,7 +15,7 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
     private static final String TIME_STAMP = "timestamp";
     private static final String MESSAGE = "message";
 
-    @ExceptionHandler({ReviewNotFoundException.class})
+    @ExceptionHandler({ReviewNotFoundException.class, MovieNotFoundException.class})
     public ResponseEntity<Object> handleNotFoundException(Exception ex) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put(TIME_STAMP, LocalDateTime.now());
