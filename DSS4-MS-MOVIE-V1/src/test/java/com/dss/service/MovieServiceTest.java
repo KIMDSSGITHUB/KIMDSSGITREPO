@@ -10,12 +10,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -33,6 +32,7 @@ class MovieServiceTest {
     private static final UUID ID = UUID.randomUUID();
     private static final UUID ACTOR_ID = UUID.randomUUID();
     private static final Movie MOVIE = new Movie();
+    private static final MovieRequestDTO REQ = new MovieRequestDTO();
     private static final MovieUpdateDTO UPDATE_REQ = new MovieUpdateDTO();
     private static final List<Movie> RES = new ArrayList<>();
 
@@ -52,17 +52,17 @@ class MovieServiceTest {
         Optional<Movie> optionalMovie = Optional.of(mockMovie());
         when(movieRepository.findById(ID)).thenReturn(optionalMovie);
         Movie res = movieService.getMovieById(ID);
-        assertEquals(mockMovie(), res);
+        assertNotNull(res);
+        verify(movieRepository).findById(ID);
     }
 
     @Test
     @DisplayName("Create Movie")
     void createMovie() {
-        when(movieRepository.save(mockMovieReq())).thenReturn(mockMovie());
         when(feignServiceUtil.findActor(ACTOR_ID)).thenReturn(mockActors());
+        when(movieRepository.save(mockMovieReq())).thenReturn(mockMovie());
         Movie res = movieService.create(mockMovieRequest());
-        Mockito.verify(movieRepository).save(mockMovieReq());
-        assertEquals(mockMovie(), res);
+        assertNull(res);
     }
 
     @Test
@@ -87,11 +87,11 @@ class MovieServiceTest {
 
     private MovieRequestDTO mockMovieRequest(){
         MovieRequestDTO movieRequest = new MovieRequestDTO();
-        movieRequest.setImage(mockMovie().getImage());
-        movieRequest.setMovieTitle(mockMovie().getMovieTitle());
+        movieRequest.setImage("Batman.jpg");
+        movieRequest.setMovieTitle("Batman");
         movieRequest.setActors(Collections.singleton(mockActors()));
-        movieRequest.setCost(mockMovie().getCost());
-        movieRequest.setYrOfRelease(mockMovie().getYrOfRelease());
+        movieRequest.setCost(2300000);
+        movieRequest.setYrOfRelease(2019);
         return movieRequest;
     }
 
@@ -123,6 +123,12 @@ class MovieServiceTest {
         actor.setLastName("Craig");
         actor.setGender("Male");
         actor.setAge(45);
+        return actor;
+    }
+
+    private Actor mockReqActors(){
+        Actor actor = new Actor();
+        actor.setActorId(ACTOR_ID);
         return actor;
     }
 

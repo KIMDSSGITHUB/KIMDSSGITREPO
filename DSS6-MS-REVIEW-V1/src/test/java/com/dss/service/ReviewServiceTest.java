@@ -5,7 +5,6 @@ import com.dss.entity.Movie;
 import com.dss.entity.Review;
 import com.dss.exception.MovieNotFoundException;
 import com.dss.exception.ReviewNotFoundException;
-import com.dss.repository.MovieRepository;
 import com.dss.repository.ReviewRepository;
 import com.dss.util.FeignServiceUtil;
 import org.junit.jupiter.api.DisplayName;
@@ -28,8 +27,6 @@ import static org.mockito.Mockito.*;
 
     @Mock
     private ReviewRepository reviewRepository;
-    @Mock
-    private MovieRepository movieRepository;
     @Mock
     private FeignServiceUtil feignServiceUtil;
 
