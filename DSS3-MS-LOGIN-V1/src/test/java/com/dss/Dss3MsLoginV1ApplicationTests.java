@@ -8,6 +8,7 @@ class Dss3MsLoginV1ApplicationTests {
 
 	@Test
 	void contextLoads() {
+		assert (true);
 	}
 	@Test
 	void applicationContextTest() {

@@ -23,7 +23,7 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(MovieCannotBeDeletedException.class)
+    @ExceptionHandler({MovieCannotBeDeletedException.class, MovieAlreadyExistException.class})
     public ResponseEntity<Object> handleMovieCannotBeDeletedException(
             Exception ex) {
         Map<String, Object> body = new LinkedHashMap<>();

@@ -32,7 +32,12 @@ public class Actor {
     @Column(name = "age",nullable = false)
     private int age;
     @JsonIgnore
-    @ManyToMany(mappedBy = "actors")
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "movieActors",
+            joinColumns = @JoinColumn(name = "movie_id"),
+            inverseJoinColumns = @JoinColumn(name = "actor_id")
+    )
     private Set<Movie> movies = new HashSet<>();
 
 }

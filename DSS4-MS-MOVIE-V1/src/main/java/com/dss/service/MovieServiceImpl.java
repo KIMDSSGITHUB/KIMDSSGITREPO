@@ -4,15 +4,11 @@ import com.dss.dto.MovieRequestDTO;
 import com.dss.dto.MovieUpdateDTO;
 import com.dss.entity.Actor;
 import com.dss.entity.Movie;
-import com.dss.exception.ActorException;
-import com.dss.exception.MovieAlreadyExistException;
-import com.dss.exception.MovieCannotBeDeletedException;
-import com.dss.exception.MovieNotFoundException;
+import com.dss.exception.*;
 import com.dss.repository.MovieRepository;
 import com.dss.util.FeignServiceUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -32,6 +28,19 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public List<Movie> getMovies() {
         return movieRepository.findAll();
+    }
+
+    @Override
+    public List<Movie> getMoviesByActorId(UUID actorId) {
+        List<Movie> movieFound = null;
+        movieFound = movieRepository.findAllByActorsActorId(actorId);
+
+        if(!movieFound.isEmpty()){
+            return movieFound;
+        }else{
+            throw new ActorException("No movies found with actor ID:" + actorId + ".");
+        }
+
     }
 
     @Override
@@ -62,18 +71,14 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public String delete(UUID id) {
         log.info("Inside delete with id: " + id);
-        try {
-            Movie savedMovie = getMovieById(id);
+        Movie savedMovie = getMovieById(id);
             int yrOfTheMovie = savedMovie.getYrOfRelease();
             LocalDate date = LocalDate.of(yrOfTheMovie,1,1);
             LocalDate today = LocalDate.now();
             if(date.isBefore(today.minusYears(1))){
             movieRepository.deleteById(id);
+            return "Successfully deleted movie with id: " + id;
             } else throw new MovieCannotBeDeletedException("Can't delete movie!");
-        } catch (EmptyResultDataAccessException e) {
-            throw new MovieNotFoundException(id);
-        }
-        return "Successfully deleted movie with id: " + id;
     }
 
     private Movie dtoToEntity(MovieRequestDTO dto, Movie entity) {
@@ -92,10 +97,6 @@ public class MovieServiceImpl implements MovieService {
     }
 
     public void validate(MovieRequestDTO request) {
-//        if (request.getMovieTitle() == null || request.getCost() == 0 || request.getYrOfRelease() == 0 || request.getImage() == null || request.getActors().isEmpty()) {
-//            //• Display proper messages in case of errors or exceptions
-//            throw new InvalidInputException("Please fill all details");
-//        }
         for (Actor actor : request.getActors()) {
             //find actor if existing using feign actor
             try {
@@ -108,9 +109,8 @@ public class MovieServiceImpl implements MovieService {
         if (request.getMovieTitle() != null) {
             Movie movie = movieRepository.findByMovieTitle(request.getMovieTitle());
             if (movie != null){
-            throw new MovieAlreadyExistException("Movie already exist");
+            throw new MovieAlreadyExistException("Movie already exists");
             }
-        }
+        } else throw new NullDetailsException("Movie title is required");
     }
-
 }

@@ -9,10 +9,10 @@ import com.dss.repository.ReviewRepository;
 import com.dss.util.FeignServiceUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -60,11 +60,10 @@ public class ReviewServiceImpl implements ReviewService{
     @Override
     public String delete(UUID id) {
         log.info("Inside delete with id: " + id);
-        try{
+        Optional<Review> savedReview = reviewRepository.findById(id);
+        if (savedReview.isPresent()) {
             reviewRepository.deleteById(id);
-        } catch (EmptyResultDataAccessException e) {
-            throw new ReviewNotFoundException(id);
-        }
+        } else throw new ReviewNotFoundException(id);
         return "Successfully deleted review with id: " + id;
     }
 

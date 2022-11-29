@@ -104,9 +104,19 @@ import static org.mockito.Mockito.*;
     @Test
     @DisplayName("Delete Review")
     void deleteReview() {
-        doNothing().when(reviewRepository).deleteById(ID);
-        reviewService.delete(ID);
+        Optional<Review> optionalReview = Optional.of(mockReview());
+        when(reviewRepository.findById(ID)).thenReturn(optionalReview);
+        String res = reviewService.delete(ID);
         verify(reviewRepository, times(1)).deleteById(ID);
+        assertEquals("Successfully deleted review with id: " + ID,res);
+    }
+
+    @Test
+    @DisplayName("Delete Review But Does Not Exists")
+    void deleteReviewButDoesNotExists() {
+        ReviewNotFoundException exception = assertThrows(ReviewNotFoundException.class,
+                () -> reviewService.delete(ID));
+        assertEquals("Review not found with Id: ".concat(ID.toString()), exception.getMessage());
     }
 
 

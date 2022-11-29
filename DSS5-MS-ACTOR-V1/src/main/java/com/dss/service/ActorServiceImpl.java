@@ -9,7 +9,6 @@ import com.dss.repository.ActorRepository;
 import com.dss.repository.MovieActorRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -57,16 +56,12 @@ public class ActorServiceImpl  implements ActorService{
     @Override
     public String delete(UUID id) {
         log.info("Inside delete with id: " + id);
-        try{
-            getActorById(id);
-            List<MovieActor> savedMovieActor = movieActorRepository.findByActorId(id);
+        getActorById(id);
+        List<MovieActor> savedMovieActor = movieActorRepository.findByActorId(id);
             if (savedMovieActor.isEmpty()){
             actorRepository.deleteById(id);
-            } else throw new ActorCannotBeDeletedException();
-        } catch (EmptyResultDataAccessException e) {
-            throw new ActorNotFoundException(id);
-        }
-        return "Successfully deleted actor with id: " + id;
+            return "Successfully deleted actor with id: " + id;
+        } else throw new ActorCannotBeDeletedException();
     }
 
     private Actor dtoToEntity(ActorRequestDTO dto, Actor entity) {

@@ -16,11 +16,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,20 +41,32 @@ class MovieControllerTest {
 
     private static final UUID MOVIE_ID = UUID.randomUUID();
     private static final UUID ACTOR_ID = UUID.randomUUID();
-    private static final MovieUpdateDTO UPDATE_REQ = new MovieUpdateDTO();
-    private static final Movie UPDATE_RES = new Movie();
+    private static final List<Movie> MOVIES = new ArrayList<>();
 
     @Test
     @DisplayName("GET: Get Movies")
     void getMovies() throws Exception {
         List<Movie> movies = Collections.singletonList(mockMovie());
-        when(movieService.getMovies()).thenReturn(movies);
+        when(movieService.getMovies()).thenReturn(MOVIES);
 
         MvcResult result = this.mockMvc.perform(get("/movies"))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        assertEquals(movies, asObjectList(result.getResponse().getContentAsString(),new TypeReference<List<Movie>>() {}));
+        assertEquals(MOVIES, asObjectList(result.getResponse().getContentAsString(),new TypeReference<List<Movie>>() {}));
+    }
+
+    @Test
+    @DisplayName("GET: Get Movies by Actor")
+    void getMoviesByActor() throws Exception {
+        List<Movie> movies = Collections.singletonList(mockMovie());
+        when(movieService.getMoviesByActorId(ACTOR_ID)).thenReturn(MOVIES);
+
+        MvcResult result = this.mockMvc.perform(get("/movies/actor/{id}", ACTOR_ID))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertEquals(MOVIES, asObjectList(result.getResponse().getContentAsString(),new TypeReference<List<Movie>>() {}));
     }
 
 
@@ -66,34 +80,70 @@ class MovieControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        assertEquals(movie, asObject(result.getResponse().getContentAsString(), Movie.class));
+        Movie res = asObject(result.getResponse().getContentAsString(), Movie.class);
+        Actor mockActor = mockMovie().getActors().iterator().next();
+        Actor resActor = res.getActors().iterator().next();
+        assertEquals(mockMovie().getMovieId(),res.getMovieId());
+        assertEquals(mockMovie().getImage(),res.getImage());
+        assertEquals(mockMovie().getMovieTitle(),res.getMovieTitle());
+        assertEquals(mockActor.getActorId(),resActor.getActorId());
+        assertEquals(mockActor.getFirstName(),resActor.getFirstName());
+        assertEquals(mockActor.getLastName(),resActor.getLastName());
+        assertEquals(mockActor.getGender(),resActor.getGender());
+        assertEquals(mockActor.getAge(),resActor.getAge());
+        assertEquals(mockMovie().getYrOfRelease(),res.getYrOfRelease());
+        assertEquals(mockMovie().getCost(),res.getCost());
     }
 
     @Test
     @DisplayName("POST: Create Movie")
     void createMovie() throws Exception {
         MovieRequestDTO req = new MovieRequestDTO(mockMovie().getImage(),mockMovie().getMovieTitle(),mockMovie().getActors(),mockMovie().getCost(),mockMovie().getYrOfRelease());
-        when(movieService.create(req)).thenReturn(mockMovie());
+        when(movieService.create(any())).thenReturn(mockMovie());
 
         MvcResult result = this.mockMvc.perform(post("/movies").contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(req)))
                 .andExpect(status().isCreated())
                 .andReturn();
 
-        assertEquals(mockMovie(), asObject(result.getResponse().getContentAsString(), Movie.class));
+        Movie res = asObject(result.getResponse().getContentAsString(), Movie.class);
+        Actor mockActor = mockMovie().getActors().iterator().next();
+        Actor resActor = res.getActors().iterator().next();
+        assertEquals(mockMovie().getMovieId(),res.getMovieId());
+        assertEquals(mockMovie().getImage(),res.getImage());
+        assertEquals(mockMovie().getMovieTitle(),res.getMovieTitle());
+        assertEquals(mockActor.getActorId(),resActor.getActorId());
+        assertEquals(mockActor.getFirstName(),resActor.getFirstName());
+        assertEquals(mockActor.getLastName(),resActor.getLastName());
+        assertEquals(mockActor.getGender(),resActor.getGender());
+        assertEquals(mockActor.getAge(),resActor.getAge());
+        assertEquals(mockMovie().getYrOfRelease(),res.getYrOfRelease());
+        assertEquals(mockMovie().getCost(),res.getCost());
     }
 
     @Test
     @DisplayName("PUT: Update Movie")
     void updateMovie() throws Exception {
-        when(movieService.update(MOVIE_ID, UPDATE_REQ)).thenReturn(UPDATE_RES);
+        when(movieService.update(any(), any())).thenReturn(mockMovie());
 
         MvcResult result = this.mockMvc.perform(put("/movies/{id}", MOVIE_ID).contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(UPDATE_REQ)))
+                        .content(asJsonString(mockMovieUpdate())))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        assertEquals(UPDATE_RES, asObject(result.getResponse().getContentAsString(), Movie.class));
+        Movie res = asObject(result.getResponse().getContentAsString(), Movie.class);
+        Actor mockActor = mockMovie().getActors().iterator().next();
+        Actor resActor = res.getActors().iterator().next();
+        assertEquals(mockMovie().getMovieId(),res.getMovieId());
+        assertEquals(mockMovie().getImage(),res.getImage());
+        assertEquals(mockMovie().getMovieTitle(),res.getMovieTitle());
+        assertEquals(mockActor.getActorId(),resActor.getActorId());
+        assertEquals(mockActor.getFirstName(),resActor.getFirstName());
+        assertEquals(mockActor.getLastName(),resActor.getLastName());
+        assertEquals(mockActor.getGender(),resActor.getGender());
+        assertEquals(mockActor.getAge(),resActor.getAge());
+        assertEquals(mockMovie().getYrOfRelease(),res.getYrOfRelease());
+        assertEquals(mockMovie().getCost(),res.getCost());
     }
 
     @Test
@@ -116,6 +166,12 @@ class MovieControllerTest {
        movie.setCost(2300000);
        movie.setYrOfRelease(2019);
        return movie;
+    }
+    private MovieUpdateDTO mockMovieUpdate(){
+        MovieUpdateDTO movieUpdate = new MovieUpdateDTO();
+        movieUpdate.setImage("Batman.jpg");
+        movieUpdate.setCost(2300000);
+        return movieUpdate;
     }
 
     private Actor mockActors(){

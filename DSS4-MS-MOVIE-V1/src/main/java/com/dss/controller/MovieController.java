@@ -23,6 +23,10 @@ public class MovieController {
     public ResponseEntity<List<Movie>> getMovies() {
         return new ResponseEntity<>(movieService.getMovies(), HttpStatus.OK);
     }
+    @GetMapping("/actor/{id}")
+    public ResponseEntity<List<Movie>> getMovieByActorId (@PathVariable UUID id){
+        return new ResponseEntity<>(movieService.getMoviesByActorId(id), HttpStatus.OK);
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<Movie> getMovie(@PathVariable UUID id) {

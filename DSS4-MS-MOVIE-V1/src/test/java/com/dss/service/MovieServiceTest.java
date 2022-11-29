@@ -4,6 +4,7 @@ import com.dss.dto.MovieRequestDTO;
 import com.dss.dto.MovieUpdateDTO;
 import com.dss.entity.Actor;
 import com.dss.entity.Movie;
+import com.dss.exception.*;
 import com.dss.repository.MovieRepository;
 import com.dss.util.FeignServiceUtil;
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +33,6 @@ class MovieServiceTest {
     private static final UUID ID = UUID.randomUUID();
     private static final UUID ACTOR_ID = UUID.randomUUID();
     private static final Movie MOVIE = new Movie();
-    private static final MovieRequestDTO REQ = new MovieRequestDTO();
     private static final MovieUpdateDTO UPDATE_REQ = new MovieUpdateDTO();
     private static final List<Movie> RES = new ArrayList<>();
 
@@ -44,6 +44,24 @@ class MovieServiceTest {
         when(movieRepository.findAll()).thenReturn(RES);
         List<Movie> res = movieService.getMovies();
         assertEquals(movies, res);
+    }
+
+    @Test
+    @DisplayName("Find All Movies Of Actor")
+    void findAllMoviesOfActor() {
+        List<Movie> movies = Collections.singletonList(mockMovie());
+        when(movieRepository.findAllByActorsActorId(ACTOR_ID)).thenReturn(movies);
+        List<Movie> res = movieService.getMoviesByActorId(ACTOR_ID);
+        assertEquals(movies, res);
+    }
+
+    @Test
+    @DisplayName("Find All Movies Of Actor When Movies Are Not Found")
+    void findAllMoviesOfActorWhenMoviesAreNotFound() {
+        List<Movie> movies = new ArrayList<>();
+        when(movieRepository.findAllByActorsActorId(ACTOR_ID)).thenReturn(movies);
+       ActorException exception =  assertThrows(ActorException.class, () -> movieService.getMoviesByActorId(ACTOR_ID));
+        assertEquals("No movies found with actor ID:" + ACTOR_ID + ".", exception.getMessage());
     }
 
     @Test
@@ -65,6 +83,50 @@ class MovieServiceTest {
         assertNull(res);
     }
 
+//    @Test
+//    @DisplayName("Create Movie But Movie Title is Blank")
+//    void createMovieButMovieTitleIsBlank() {
+//        MovieRequestDTO movieReq = mockMovieRequest();
+//        movieReq.setMovieTitle("");
+//        when(feignServiceUtil.findActor(ACTOR_ID)).thenReturn(mockActors());
+//        when(movieRepository.save(mockMovieReq())).thenReturn(mockMovie());
+//        Movie res = movieService.create(movieReq);
+//        assertNull(res);
+//    }
+
+    @Test
+    @DisplayName("Create Movie But Actor Not Found")
+    void createMovieButActorNotFound() {
+        MovieRequestDTO movieReq = mockMovieRequest();
+        Actor actor = new Actor();
+        when(feignServiceUtil.findActor(ACTOR_ID)).thenReturn(actor);
+        when(movieRepository.findByMovieTitle(mockMovieRequest().getMovieTitle()));
+        ActorException exception =  assertThrows(ActorException.class, () -> movieService.create(movieReq));
+        assertEquals("Actor " + mockActors().getFirstName() + " " + mockActors().getLastName() + " does not exist", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Create Movie But Movie Already Exists")
+    void createMovieButMovieAlreadyExists() {
+        MovieRequestDTO movieReq = mockMovieRequest();
+        Actor actor = mockActors();
+        when(feignServiceUtil.findActor(ACTOR_ID)).thenReturn(actor);
+        when(movieRepository.findByMovieTitle(mockMovieRequest().getMovieTitle())).thenReturn(mockMovie());
+        MovieAlreadyExistException exception =  assertThrows(MovieAlreadyExistException.class, () -> movieService.create(movieReq));
+        assertEquals("Movie already exists", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Create Movie But Movie Title Is Blank")
+    void createMovieButMovieTitleIsBlank() {
+        MovieRequestDTO movieReq = mockMovieRequest();
+        movieReq.setMovieTitle(null);
+        Actor actor = mockActors();
+        when(feignServiceUtil.findActor(ACTOR_ID)).thenReturn(actor);
+        NullDetailsException exception =  assertThrows(NullDetailsException.class, () -> movieService.create(movieReq));
+        assertEquals("Movie title is required", exception.getMessage());
+    }
+
     @Test
     @DisplayName("Update Movie When Movie Exists")
     void updateMovieWhenMovieExists() {
@@ -83,6 +145,25 @@ class MovieServiceTest {
         doNothing().when(movieRepository).deleteById(ID);
         movieService.delete(ID);
         verify(movieRepository, times(1)).deleteById(ID);
+    }
+
+    @Test
+    @DisplayName("Delete Movie Unsuccessful")
+    void deleteMovieUnsuccessful() {
+        MOVIE.setYrOfRelease(2022);
+        Optional<Movie> optionalMovie = Optional.of(MOVIE);
+        when(movieRepository.findById(ID)).thenReturn(optionalMovie);
+        MovieCannotBeDeletedException exception =  assertThrows(MovieCannotBeDeletedException.class, () -> movieService.delete(ID));
+        assertEquals("Can't delete movie!", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Delete Movie But Movie Not Found")
+    void deleteMovieButMovieNotFound() {
+        Optional<Movie> optionalMovie = Optional.empty();
+        when(movieRepository.findById(ID)).thenReturn(optionalMovie);
+        MovieNotFoundException exception =  assertThrows(MovieNotFoundException.class, () -> movieService.delete(ID));
+        assertEquals("Movie not found with Id: ".concat(ID.toString()), exception.getMessage());
     }
 
     private MovieRequestDTO mockMovieRequest(){
@@ -123,12 +204,6 @@ class MovieServiceTest {
         actor.setLastName("Craig");
         actor.setGender("Male");
         actor.setAge(45);
-        return actor;
-    }
-
-    private Actor mockReqActors(){
-        Actor actor = new Actor();
-        actor.setActorId(ACTOR_ID);
         return actor;
     }
 

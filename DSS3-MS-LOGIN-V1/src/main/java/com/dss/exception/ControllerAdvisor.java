@@ -45,7 +45,7 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(InvalidCredentialsException.class)
+    @ExceptionHandler({InvalidCredentialsException.class, NullCredentialsException.class})
     public ResponseEntity<Object> handleInvalidCredentialsException(
             Exception ex) {
         Map<String, Object> body = new LinkedHashMap<>();

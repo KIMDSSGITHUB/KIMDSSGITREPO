@@ -7,6 +7,7 @@ import com.dss.dto.UserResponseDTO;
 import com.dss.entity.User;
 import com.dss.exception.ConflictException;
 import com.dss.exception.InvalidCredentialsException;
+import com.dss.exception.NullCredentialsException;
 import com.dss.repository.UserRepository;
 import com.dss.util.EncoderUtil;
 import com.dss.util.TokenUtil;
@@ -23,8 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
@@ -75,13 +75,23 @@ class UserServiceTest {
 
     @Test
     @DisplayName("Email Already Registered")
-    void throwValidationException() {
+    void throwEmailValidationException() {
         User user = mockUser();
         UserRequestDTO userRequest = mockUserRequest();
     when(userRepository.findOneByEmail(user.getEmail())).thenReturn(Optional.of(user));
         ConflictException exception = assertThrows(ConflictException.class,
                 () -> userService.registration(userRequest));
         assertEquals("Email already in use.", exception.getMessage());
+    }
+    @Test
+    @DisplayName("Phone Already Registered")
+    void throwPhoneValidationException() {
+        User user = mockUser();
+        UserRequestDTO userRequest = mockUserRequest();
+        when(userRepository.findOneByPhone(user.getPhone())).thenReturn(Optional.of(user));
+        ConflictException exception = assertThrows(ConflictException.class,
+                () -> userService.registration(userRequest));
+        assertEquals("Phone already in use.", exception.getMessage());
     }
 
     @Test
@@ -91,7 +101,17 @@ class UserServiceTest {
         when(tokenUtil.generateToken(mockUser())).thenReturn(TOKEN);
         when(userRepository.findOneByEmail(mockUser().getEmail())).thenReturn(Optional.of(mockUser()));
         LoginResponseDTO res = userService.login(mockLogin());
+        assertNotNull(mockLogin().getEmail());
+        assertNotNull(mockLogin().getPassword());
         assertEquals(mockLoginResponse(), res);
+    }
+    @Test
+    @DisplayName("Login User Unsuccessful")
+    void loginUserUnsuccessful() {
+        UserLoginDTO login = mockLogin();
+        when(userRepository.findOneByEmail(mockUser().getEmail())).thenReturn(Optional.empty());
+        InvalidCredentialsException exception = assertThrows(InvalidCredentialsException.class, () -> userService.login(login));
+        assertEquals("Email or password is incorrect", exception.getMessage());
     }
 
     @Test
@@ -102,6 +122,36 @@ class UserServiceTest {
         when(userRepository.findOneByEmail(mockUser().getEmail())).thenReturn(Optional.of(mockUser()));
         InvalidCredentialsException exception = assertThrows(InvalidCredentialsException.class, () -> userService.login(login));
         assertEquals("Email or password is incorrect", exception.getMessage());
+    }
+    @Test
+    @DisplayName("Login User With No Credential Inputs")
+    void loginUserNoInputs() {
+        UserLoginDTO login = mockLogin();
+        login.setEmail("");
+        login.setPassword("");
+        when(userRepository.findOneByEmail(login.getEmail())).thenReturn(Optional.empty());
+        NullCredentialsException exception = assertThrows(NullCredentialsException.class, () -> userService.login(login));
+        assertEquals("Please input your email/password", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Login User With Email is Blank")
+    void loginUserWithEmailIsBlank() {
+        UserLoginDTO login = mockLogin();
+        login.setEmail("");
+        when(userRepository.findOneByEmail(login.getEmail())).thenReturn(Optional.empty());
+        NullCredentialsException exception = assertThrows(NullCredentialsException.class, () -> userService.login(login));
+        assertEquals("Please input your email/password", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Login User With Password is Blank")
+    void loginUserWithPasswordIsBlank() {
+        UserLoginDTO login = mockLogin();
+        login.setPassword("");
+        when(userRepository.findOneByEmail(login.getEmail())).thenReturn(Optional.empty());
+        NullCredentialsException exception = assertThrows(NullCredentialsException.class, () -> userService.login(login));
+        assertEquals("Please input your email/password", exception.getMessage());
     }
 
     private UserLoginDTO mockLogin(){

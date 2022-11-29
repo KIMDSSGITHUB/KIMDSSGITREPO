@@ -9,6 +9,7 @@ import java.util.UUID;
 
 public interface MovieService {
     List<Movie>  getMovies();
+    List<Movie> getMoviesByActorId(UUID actorId);
     Movie getMovieById(UUID id);
     Movie create(MovieRequestDTO request);
     Movie update(UUID id, MovieUpdateDTO request);

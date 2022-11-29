@@ -111,7 +111,7 @@ class ActorServiceTest {
         ActorCannotBeDeletedException exception = assertThrows(ActorCannotBeDeletedException.class,
                 () -> actorService.delete(ID));
 
-        assertEquals("Actor cannot be deleted", exception.getMessage());
+        assertEquals("Actor cannot be deleted with existing movies", exception.getMessage());
     }
 
     private MovieActor mockMovieActor() {
