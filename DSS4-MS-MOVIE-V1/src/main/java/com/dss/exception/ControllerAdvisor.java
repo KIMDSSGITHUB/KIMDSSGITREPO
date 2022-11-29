@@ -40,4 +40,13 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
         body.put(MESSAGE, ex.getMessage());
         return new ResponseEntity<>(body, HttpStatus.BAD_GATEWAY);
     }
+
+    @ExceptionHandler(NullDetailsException.class)
+    public ResponseEntity<Object> handleBadRequestException(
+            Exception ex) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put(TIME_STAMP, LocalDateTime.now());
+        body.put(MESSAGE, ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
 }
