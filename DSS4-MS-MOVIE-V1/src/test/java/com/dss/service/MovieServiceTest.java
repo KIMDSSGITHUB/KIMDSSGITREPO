@@ -83,17 +83,6 @@ class MovieServiceTest {
         assertNull(res);
     }
 
-//    @Test
-//    @DisplayName("Create Movie But Movie Title is Blank")
-//    void createMovieButMovieTitleIsBlank() {
-//        MovieRequestDTO movieReq = mockMovieRequest();
-//        movieReq.setMovieTitle("");
-//        when(feignServiceUtil.findActor(ACTOR_ID)).thenReturn(mockActors());
-//        when(movieRepository.save(mockMovieReq())).thenReturn(mockMovie());
-//        Movie res = movieService.create(movieReq);
-//        assertNull(res);
-//    }
-
     @Test
     @DisplayName("Create Movie But Actor Not Found")
     void createMovieButActorNotFound() {
@@ -130,11 +119,20 @@ class MovieServiceTest {
     @Test
     @DisplayName("Update Movie When Movie Exists")
     void updateMovieWhenMovieExists() {
-        Optional<Movie> optionalReview = Optional.of(MOVIE);
-        when(movieRepository.findById(ID)).thenReturn(optionalReview);
+        Optional<Movie> optionalMovie = Optional.of(MOVIE);
+        when(movieRepository.findById(ID)).thenReturn(optionalMovie);
         when(movieRepository.save(MOVIE)).thenReturn(MOVIE);
         Movie res = movieService.update(ID, UPDATE_REQ);
         assertEquals(MOVIE, res);
+    }
+
+    @Test
+    @DisplayName("Update Movie When Movie Does Not Exists")
+    void updateMovieWhenMovieDoesNotExists() {
+        Optional<Movie> optionalMovie = Optional.empty();
+        when(movieRepository.findById(ID)).thenReturn(optionalMovie);
+        MovieNotFoundException exception =  assertThrows(MovieNotFoundException.class, () -> movieService.update(ID,UPDATE_REQ));
+        assertEquals("Movie not found with Id: ".concat(ID.toString()), exception.getMessage());
     }
 
     @Test

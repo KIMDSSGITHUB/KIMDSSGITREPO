@@ -82,12 +82,19 @@ class ActorServiceTest {
     @DisplayName("Update Actor When Actor Exists")
     void updateActorWhenActorExists() {
         Optional<Actor> optionalActor = Optional.of(ACTOR);
-
         when(actorRepository.findById(ID)).thenReturn(optionalActor);
         when(actorRepository.save(ACTOR)).thenReturn(ACTOR);
-
         Actor res = actorService.update(ID, UPDATE_REQ);
         assertEquals(ACTOR, res);
+    }
+
+    @Test
+    @DisplayName("Update Actor When Actor Does Not Exists")
+    void updateActorWhenActorDoesNotExists() {
+        Optional<Actor> optionalActor = Optional.empty();
+        when(actorRepository.findById(ID)).thenReturn(optionalActor);
+        ActorNotFoundException exception =  assertThrows(ActorNotFoundException.class, () -> actorService.update(ID,UPDATE_REQ));
+        assertEquals("Actor not found with Id: ".concat(ID.toString()), exception.getMessage());
     }
 
     @Test

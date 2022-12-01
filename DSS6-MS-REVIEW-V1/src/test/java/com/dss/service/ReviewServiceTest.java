@@ -36,7 +36,7 @@ import static org.mockito.Mockito.*;
     private static final UUID ID = UUID.randomUUID();
     private static final UUID MOVIE_ID = UUID.randomUUID();
     private static final Review REVIEW = new Review();
-    private static final ReviewRequestDTO REQ = new ReviewRequestDTO();
+    private static final ReviewRequestDTO UPDATE_REQ = new ReviewRequestDTO();
     private static final List<Review> RES = new ArrayList<>();
 
 
@@ -99,6 +99,16 @@ import static org.mockito.Mockito.*;
         Review res = reviewService.update(mockReview().getReviewId(), mockRequestReview());
 
         assertEquals(mockReview(), res);
+    }
+
+    @Test
+    @DisplayName("Update Review When Review Does Not Exists")
+    void updateReviewWhenReviewDoesNotExists() {
+        Optional<Review> optionalReview = Optional.empty();
+        when(feignServiceUtil.findMovie(MOVIE_ID)).thenReturn(mockMovie());
+        when(reviewRepository.findById(mockReview().getReviewId())).thenReturn(optionalReview);
+        ReviewNotFoundException exception =  assertThrows(ReviewNotFoundException.class, () -> reviewService.update(ID,UPDATE_REQ));
+        assertEquals("Review not found with Id: ".concat(ID.toString()), exception.getMessage());
     }
 
     @Test
